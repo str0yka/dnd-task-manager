@@ -128,7 +128,7 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
       )}
       {isEditBoardTitle && (
         <form
-          className="flex items-center gap-1"
+          className="flex items-start gap-1"
           onSubmit={handleSubmit((values) => {
             editBoardTitle(id, values.boardTitle);
             setIsEditBoardTitle(false);
@@ -136,6 +136,10 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
         >
           <div className="flex-grow">
             <Input
+              {...(!!errors.boardTitle?.message && {
+                error: true,
+                helperText: errors.boardTitle.message,
+              })}
               {...register('boardTitle', {
                 required: {
                   value: true,
