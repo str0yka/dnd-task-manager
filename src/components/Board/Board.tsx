@@ -3,13 +3,20 @@ import { useForm } from 'react-hook-form';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Button, Input } from '~components/common';
-import { TASK_MAX_LENGHT, TASK_MIN_LENGHT } from '~utils/constants';
+import { IconTrash, IconPen, IconClose, IconTick } from '~components/common/icons';
+import {
+  BOARD_MAX_LENGHT,
+  BOARD_MIN_LENGHT,
+  TASK_MAX_LENGHT,
+  TASK_MIN_LENGHT,
+} from '~utils/constants';
 import { useBoardStore } from '~utils/store';
 
 import { Task } from './components';
 
-interface AddCardValues {
-  text: string;
+interface BoardValues {
+  boardTitle: string;
+  newCardText: string;
 }
 
 interface BoardProps extends Board {
@@ -19,21 +26,26 @@ interface BoardProps extends Board {
 export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
   const boardRef = useRef<HTMLElement>(null);
   const taskListRef = useRef<HTMLDivElement>(null);
+  const [isEditBoardTitle, setIsEditBoardTitle] = useState(false);
   const [isAddCardMenuOpen, setIsAddCardMenuOpen] = useState(false);
 
   const {
     draggedBoard,
     setDraggedBoard,
+    editBoardTitle,
     setDraggedTask,
     draggedTask,
     addTask,
     moveTask,
     moveBoard,
+    removeBoard,
   } = useBoardStore(
     useShallow((state) => ({
       addTask: state.addTask,
       moveTask: state.moveTask,
       moveBoard: state.moveBoard,
+      removeBoard: state.removeBoard,
+      editBoardTitle: state.editBoardTitle,
       draggedTask: state.draggedTask,
       draggedBoard: state.draggedBoard,
       setDraggedBoard: state.setDraggedBoard,
@@ -46,34 +58,24 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
     reset,
     handleSubmit,
     formState: { errors },
-  } = useForm<AddCardValues>({
+  } = useForm<BoardValues>({
     defaultValues: {
-      text: '',
+      boardTitle: title,
+      newCardText: '',
     },
   });
-
-  const handleOpenAddCardMenu = () => setIsAddCardMenuOpen(true);
-
-  const handleCloseAddCardMenu = () => {
-    setIsAddCardMenuOpen(false);
-    reset();
-  };
-
-  const onAddCard = (values: AddCardValues) => {
-    addTask(id, values.text);
-    handleCloseAddCardMenu();
-  };
 
   return (
     <article
       ref={boardRef}
       className="flex-shrink-0 w-80 max-h-96 overflow-y-auto p-2 flex flex-col gap-2 bg-gray-100 rounded cursor-grab"
-      draggable
+      draggable={!(isEditBoardTitle || isAddCardMenuOpen)}
       onDragStart={(event) => {
+        if (isEditBoardTitle || isAddCardMenuOpen) return;
+
         setDraggedBoard({ id, tasks, title });
 
-        event.dataTransfer.setData('method', 'moveBoard');
-        event.dataTransfer.setData('fromIndex', index.toString());
+        event.dataTransfer.setData('index', index.toString());
       }}
       onDragEnd={() => {
         setDraggedBoard(null);
@@ -96,13 +98,9 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
       }}
       onDrop={(event) => {
         if (draggedBoard) {
-          const method = event.dataTransfer.getData('method');
-          const fromIndex = Number(event.dataTransfer.getData('fromIndex'));
+          const fromIndex = Number(event.dataTransfer.getData('index'));
 
-          if (method === 'moveBoard') {
-            moveBoard(fromIndex, index);
-          }
-
+          moveBoard(fromIndex, index);
           setDraggedBoard(null);
 
           ['outline', 'outline-offset-2', 'outline-2', 'outline-white'].forEach(
@@ -111,9 +109,72 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
         }
       }}
     >
-      <div className="p-2">
-        <h2 className="font-semibold">{title}</h2>
-      </div>
+      {!isEditBoardTitle && (
+        <div className="p-2 flex items-center gap-1">
+          <div className="flex-grow">
+            <h2 className="font-semibold">{title}</h2>
+          </div>
+          <div>
+            <Button onClick={() => setIsEditBoardTitle(true)}>
+              <IconPen />
+            </Button>
+          </div>
+          <div>
+            <Button onClick={() => removeBoard(id)}>
+              <IconTrash />
+            </Button>
+          </div>
+        </div>
+      )}
+      {isEditBoardTitle && (
+        <form
+          className="flex items-center gap-1"
+          onSubmit={handleSubmit((values) => {
+            editBoardTitle(id, values.boardTitle);
+            setIsEditBoardTitle(false);
+          })}
+        >
+          <div className="flex-grow">
+            <Input
+              {...register('boardTitle', {
+                required: {
+                  value: true,
+                  message: 'field is required',
+                },
+                minLength: {
+                  value: BOARD_MIN_LENGHT,
+                  message: `the field must contain at least ${BOARD_MIN_LENGHT} characters`,
+                },
+                maxLength: {
+                  value: BOARD_MAX_LENGHT,
+                  message: `the maximum allowed number of characters is ${BOARD_MAX_LENGHT}`,
+                },
+              })}
+            />
+          </div>
+          <div>
+            <Button
+              type="submit"
+              variant="contained"
+              color="green"
+            >
+              <IconTick />
+            </Button>
+          </div>
+          <div>
+            <Button
+              variant="contained"
+              color="red"
+              onClick={() => {
+                reset({ boardTitle: title });
+                setIsEditBoardTitle(false);
+              }}
+            >
+              <IconClose />
+            </Button>
+          </div>
+        </form>
+      )}
       <div
         ref={taskListRef}
         className="flex flex-col rounded pb-6"
@@ -137,15 +198,10 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
         }}
         onDrop={(event) => {
           if (draggedTask) {
-            const method = event.dataTransfer.getData('method');
+            const fromBoardId = Number(event.dataTransfer.getData('taskBoardId'));
+            const toTaskIndex = fromBoardId === id ? tasks.length - 1 : tasks.length;
 
-            if (method === 'moveTask') {
-              const fromBoardId = Number(event.dataTransfer.getData('fromBoardId'));
-
-              const toTaskIndex = fromBoardId === id ? tasks.length - 1 : tasks.length;
-
-              moveTask(draggedTask.id, fromBoardId, id, toTaskIndex);
-            }
+            moveTask(draggedTask.id, fromBoardId, id, toTaskIndex);
 
             setDraggedTask(null);
 
@@ -173,7 +229,7 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
       {!isAddCardMenuOpen && (
         <Button
           variant="contained"
-          onClick={handleOpenAddCardMenu}
+          onClick={() => setIsAddCardMenuOpen(true)}
         >
           Add card
         </Button>
@@ -181,26 +237,30 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
       {isAddCardMenuOpen && (
         <form
           className="flex flex-col gap-2"
-          onSubmit={handleSubmit(onAddCard)}
+          onSubmit={handleSubmit((values) => {
+            addTask(id, values.newCardText);
+            setIsAddCardMenuOpen(false);
+            reset({ newCardText: '' });
+          })}
         >
           <Input
             placeholder="card text"
-            {...(!!errors.text?.message && {
+            {...(!!errors.newCardText?.message && {
               error: true,
-              helperText: errors.text.message,
+              helperText: errors.newCardText.message,
             })}
-            {...register('text', {
+            {...register('newCardText', {
               required: {
                 value: true,
                 message: 'field is required',
               },
               minLength: {
                 value: TASK_MIN_LENGHT,
-                message: 'the field must contain at least 2 characters',
+                message: `the field must contain at least ${TASK_MIN_LENGHT} characters`,
               },
               maxLength: {
                 value: TASK_MAX_LENGHT,
-                message: 'the maximum allowed number of characters is 25',
+                message: `the maximum allowed number of characters is ${TASK_MAX_LENGHT}`,
               },
             })}
           />
@@ -215,7 +275,10 @@ export const Board: React.FC<BoardProps> = ({ index, id, title, tasks }) => {
             <Button
               variant="contained"
               color="red"
-              onClick={handleCloseAddCardMenu}
+              onClick={() => {
+                setIsAddCardMenuOpen(false);
+                reset({ newCardText: '' });
+              }}
             >
               close
             </Button>

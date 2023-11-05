@@ -56,8 +56,7 @@ export const Task: React.FC<TaskProps> = ({ boardId, index, id, text }) => {
 
             setDraggedTask({ id, text });
 
-            event.dataTransfer.setData('method', 'moveTask');
-            event.dataTransfer.setData('fromBoardId', boardId.toString());
+            event.dataTransfer.setData('taskBoardId', boardId.toString());
 
             setTimeout(() => taskRef.current?.classList.add('opacity-25'), 0);
           }}
@@ -94,14 +93,10 @@ export const Task: React.FC<TaskProps> = ({ boardId, index, id, text }) => {
           onDrop={(event) => {
             if (draggedTask) {
               event.stopPropagation();
-              const method = event.dataTransfer.getData('method');
 
-              if (method === 'moveTask') {
-                const fromBoardId = Number(event.dataTransfer.getData('fromBoardId'));
+              const fromBoardId = Number(event.dataTransfer.getData('taskBoardId'));
 
-                moveTask(draggedTask.id, fromBoardId, boardId, index);
-              }
-
+              moveTask(draggedTask.id, fromBoardId, boardId, index);
               setDraggedTask(null);
 
               ['outline', 'outline-offset-2', 'outine-2', 'outline-violet-400'].forEach(
@@ -141,11 +136,11 @@ export const Task: React.FC<TaskProps> = ({ boardId, index, id, text }) => {
                 },
                 minLength: {
                   value: TASK_MIN_LENGHT,
-                  message: 'min characters is 2',
+                  message: `the field must contain at least ${TASK_MIN_LENGHT} characters`,
                 },
                 maxLength: {
                   value: TASK_MAX_LENGHT,
-                  message: 'max characters is 25',
+                  message: `the maximum allowed number of characters is ${TASK_MAX_LENGHT}`,
                 },
               })}
             />

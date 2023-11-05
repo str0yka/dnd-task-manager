@@ -8,13 +8,13 @@ export const IconClose: React.FC<IconProps> = (props) => (
   >
     <path
       d="M7 17L16.8995 7.10051"
-      stroke="cuurent"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
     />
     <path
       d="M7 7.00001L16.8995 16.8995"
-      stroke="current"
+      stroke="currentColor"
       strokeLinecap="round"
       strokeLinejoin="round"
     />

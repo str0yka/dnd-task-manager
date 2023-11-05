@@ -9,7 +9,7 @@ export const IconTick: React.FC<IconProps> = (props) => (
   >
     <path
       d="M5.5 12.5L10.167 17L19.5 8"
-      stroke="current"
+      stroke="currentColor"
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
