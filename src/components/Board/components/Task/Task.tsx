@@ -100,24 +100,6 @@ export const Task: React.FC<TaskProps> = ({ boardId, id, text }) => {
               <IconClose className="stroke-white w-4 h-4" />
             </Button>
           </div>
-          {/* <button
-            type="submit"
-            aria-hidden="true"
-            className="flex-shrink bg-green-300 p-2.5 flex items-center justify-center rounded hover:bg-green-400/50"
-          >
-            <IconTick className="stroke-black" />
-          </button>
-          <button
-            type="submit"
-            aria-hidden="true"
-            className="flex-shrink bg-red-300 p-2.5 flex items-center justify-center rounded hover:bg-red-400/50"
-            onClick={() => {
-              setIsEdit(false);
-              setValue('text', text);
-            }}
-          >
-            <IconClose className="stroke-black" />
-          </button> */}
         </form>
       )}
     </>
