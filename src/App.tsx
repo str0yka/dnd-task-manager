@@ -7,39 +7,26 @@ export const App = () => {
 
   return (
     <main className="h-screen bg-gradient-to-r from-violet-500 to-fuchsia-500">
-      <div className="h-full flex items-start overflow-x-auto gap-2 p-5">
-        {boards.map((board) => (
+      <div className="w-full h-full flex items-start overflow-x-auto gap-2 p-5">
+        {boards.map((board, index) => (
           <Board
             key={board.id}
+            index={index}
             {...board}
           />
         ))}
       </div>
-      <div className="absolute inset-x-0 bottom-16 flex items-start w-fit">
-        <Button
-          variant="contained"
-          type="button"
-          color="violet"
-          onClick={addBoard}
-        >
-          a
-        </Button>
-        <Button
-          variant="outlined"
-          type="button"
-          color="indigo"
-          onClick={addBoard}
-        >
-          a
-        </Button>
-        <Button
-          variant="text"
-          type="button"
-          color="slate"
-          onClick={addBoard}
-        >
-          a
-        </Button>
+      <div className="absolute inset-x-0 bottom-10 flex justify-center">
+        <div>
+          <Button
+            variant="text"
+            type="button"
+            color="white"
+            onClick={addBoard}
+          >
+            Add board
+          </Button>
+        </div>
       </div>
     </main>
   );

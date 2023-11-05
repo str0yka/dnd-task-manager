@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useShallow } from 'zustand/react/shallow';
 
 import { Button, Input } from '~components/common';
-import { IconClose, IconTick } from '~components/common/icons';
+import { IconClose, IconTick, IconTrash } from '~components/common/icons';
 import { TASK_MIN_LENGHT, TASK_MAX_LENGHT } from '~utils/constants';
 import { useBoardStore } from '~utils/store';
 
@@ -12,16 +12,21 @@ interface EditCardValues {
 }
 
 interface TaskProps extends Task {
+  index: number;
   boardId: number;
 }
 
-export const Task: React.FC<TaskProps> = ({ boardId, id, text }) => {
+export const Task: React.FC<TaskProps> = ({ boardId, index, id, text }) => {
+  const taskRef = useRef<HTMLDivElement>(null);
   const [isEdit, setIsEdit] = useState(false);
 
-  const { removeTask, editTaskText } = useBoardStore(
+  const { draggedTask, setDraggedTask, moveTask, removeTask, editTaskText } = useBoardStore(
     useShallow((state) => ({
       editTaskText: state.editTaskText,
       removeTask: state.removeTask,
+      moveTask: state.moveTask,
+      draggedTask: state.draggedTask,
+      setDraggedTask: state.setDraggedTask,
     })),
   );
 
@@ -40,14 +45,83 @@ export const Task: React.FC<TaskProps> = ({ boardId, id, text }) => {
   return (
     <>
       {!isEdit && (
-        <button
+        <div
+          ref={taskRef}
+          className="w-full flex items-center justify-between text-left font-medium text-sm p-2 rounded bg-gray-400/10 hover:bg-gray-400/20 cursor-grab"
+          aria-hidden="true"
+          draggable
           onClick={() => setIsEdit(true)}
-          key={id}
-          type="button"
-          className="w-full text-left font-medium text-sm p-2 rounded bg-gray-400/10 hover:bg-gray-400/20"
+          onDragStart={(event) => {
+            event.stopPropagation();
+
+            setDraggedTask({ id, text });
+
+            event.dataTransfer.setData('method', 'moveTask');
+            event.dataTransfer.setData('fromBoardId', boardId.toString());
+
+            setTimeout(() => taskRef.current?.classList.add('opacity-25'), 0);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+
+            if (draggedTask) {
+              event.stopPropagation();
+
+              ['outline', 'outline-offset-2', 'outine-2', 'outline-violet-400'].forEach(
+                (cn) => taskRef.current?.classList.add(cn),
+              );
+            }
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault();
+
+            if (draggedTask) {
+              event.stopPropagation();
+
+              ['outline', 'outline-offset-2', 'outine-2', 'outline-violet-400'].forEach(
+                (cn) => taskRef.current?.classList.remove(cn),
+              );
+            }
+          }}
+          onDragEnd={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            setDraggedTask(null);
+
+            taskRef.current?.classList.remove('opacity-25');
+          }}
+          onDrop={(event) => {
+            if (draggedTask) {
+              event.stopPropagation();
+              const method = event.dataTransfer.getData('method');
+
+              if (method === 'moveTask') {
+                const fromBoardId = Number(event.dataTransfer.getData('fromBoardId'));
+
+                moveTask(draggedTask.id, fromBoardId, boardId, index);
+              }
+
+              setDraggedTask(null);
+
+              ['outline', 'outline-offset-2', 'outine-2', 'outline-violet-400'].forEach(
+                (cn) => taskRef.current?.classList.remove(cn),
+              );
+            }
+          }}
         >
-          {text}
-        </button>
+          <span className="flex-grow">{text}</span>
+          <div>
+            <Button
+              onClick={(event) => {
+                event.stopPropagation();
+                removeTask(boardId, id);
+              }}
+            >
+              <IconTrash className="stroke-black" />
+            </Button>
+          </div>
+        </div>
       )}
       {isEdit && (
         <form

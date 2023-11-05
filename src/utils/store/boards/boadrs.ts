@@ -8,6 +8,10 @@ import { moveTask } from './boards.helpers';
 interface BoardState {
   title: string;
   boards: Board[];
+  draggedTask: Task | null;
+  draggedBoard: Board | null;
+  setDraggedTask: (task: Task | null) => void;
+  setDraggedBoard: (board: Board | null) => void;
   addBoard: () => void;
   removeBoard: (id: number) => void;
   moveBoard: (fromIndex: number, toIndex: number) => void;
@@ -24,6 +28,10 @@ export const useBoardStore = create<BoardState>()(
       (set) => ({
         title: 'project name',
         boards: [],
+        draggedTask: null,
+        draggedBoard: null,
+        setDraggedTask: (task) => set(() => ({ draggedTask: task })),
+        setDraggedBoard: (board) => set(() => ({ draggedBoard: board })),
         addBoard: () =>
           set((state) => ({
             boards: [
