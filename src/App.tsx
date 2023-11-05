@@ -15,13 +15,30 @@ export const App = () => {
           />
         ))}
       </div>
-      <div className="absolute m-auto left-0 right-0 bottom-[35px] w-fit">
+      <div className="absolute inset-x-0 bottom-16 flex items-start w-fit">
+        <Button
+          variant="contained"
+          type="button"
+          color="violet"
+          onClick={addBoard}
+        >
+          a
+        </Button>
+        <Button
+          variant="outlined"
+          type="button"
+          color="indigo"
+          onClick={addBoard}
+        >
+          a
+        </Button>
         <Button
           variant="text"
           type="button"
+          color="slate"
           onClick={addBoard}
         >
-          Add board
+          a
         </Button>
       </div>
     </main>

@@ -54,44 +54,70 @@ export const Task: React.FC<TaskProps> = ({ boardId, id, text }) => {
           className="flex items-start gap-1"
           onSubmit={handleSubmit(onEdit)}
         >
-          <Input
-            {...(!!errors.text?.message && {
-              error: true,
-              helperText: errors.text.message,
-            })}
-            {...register('text', {
-              required: {
-                value: true,
-                message: 'field is required',
-              },
-              minLength: {
-                value: TASK_MIN_LENGHT,
-                message: 'min characters is 2',
-              },
-              maxLength: {
-                value: TASK_MAX_LENGHT,
-                message: 'max characters is 25',
-              },
-            })}
-          />
-          <button
+          <div className="flex-grow">
+            <Input
+              {...(!!errors.text?.message && {
+                error: true,
+                helperText: errors.text.message,
+              })}
+              {...register('text', {
+                required: {
+                  value: true,
+                  message: 'field is required',
+                },
+                minLength: {
+                  value: TASK_MIN_LENGHT,
+                  message: 'min characters is 2',
+                },
+                maxLength: {
+                  value: TASK_MAX_LENGHT,
+                  message: 'max characters is 25',
+                },
+              })}
+            />
+          </div>
+          <div>
+            <Button
+              type="submit"
+              aria-hidden="true"
+              variant="contained"
+              color="green"
+            >
+              <IconTick className="stroke-white w-4 h-4" />
+            </Button>
+          </div>
+          <div>
+            <Button
+              type="submit"
+              aria-hidden="true"
+              variant="contained"
+              color="red"
+              onClick={() => {
+                setIsEdit(false);
+                setValue('text', text);
+              }}
+            >
+              <IconClose className="stroke-white w-4 h-4" />
+            </Button>
+          </div>
+          {/* <button
             type="submit"
             aria-hidden="true"
-            className="bg-green-300 w-9 h-9 flex items-center justify-center rounded hover:bg-green-400/50"
+            className="flex-shrink bg-green-300 p-2.5 flex items-center justify-center rounded hover:bg-green-400/50"
           >
             <IconTick className="stroke-black" />
           </button>
           <button
             type="submit"
             aria-hidden="true"
-            className="bg-red-300 w-9 h-9 flex items-center justify-center rounded hover:bg-red-400/50"
+            className="flex-shrink bg-red-300 p-2.5 flex items-center justify-center rounded hover:bg-red-400/50"
             onClick={() => {
               setIsEdit(false);
               setValue('text', text);
             }}
           >
             <IconClose className="stroke-black" />
-          </button>
+          </button> */}
         </form>
       )}
     </>

@@ -8,6 +8,8 @@ export const cn = (...classNames: ClassNamesParams) => {
     const isObject =
       typeof currentItem === 'object' && !Array.isArray(currentItem) && currentItem !== null;
 
+    console.log(currentItem);
+
     if (isObject) {
       Object.keys(currentItem).forEach((className) => {
         const currentClassName = currentItem[className];

@@ -8,7 +8,7 @@ import { useBoardStore } from '~utils/store';
 import { Task } from './components';
 
 interface AddCardValues {
-  text: '';
+  text: string;
 }
 
 type BoardProps = Board;
@@ -42,18 +42,18 @@ export const Board: React.FC<BoardProps> = ({ id, title, tasks }) => {
   };
 
   return (
-    <article className="w-72 p-2 flex flex-col gap-2 bg-gray-100 rounded">
+    <article className="w-80 p-2 flex flex-col gap-2 bg-gray-100 rounded">
       <div className="p-2">
         <h2 className="font-semibold">{title}</h2>
       </div>
-      <div className="flex flex-col gap-2">
-        {tasks.map((task) => (
-          <Task
-            boardId={id}
-            {...task}
-          />
-        ))}
-      </div>
+      {/* <div className="flex flex-col gap-2"> */}
+      {tasks.map((task) => (
+        <Task
+          boardId={id}
+          {...task}
+        />
+      ))}
+      {/* </div> */}
       {!isAddCardMenuOpen && (
         <Button
           variant="contained"
@@ -91,12 +91,14 @@ export const Board: React.FC<BoardProps> = ({ id, title, tasks }) => {
           <div className="flex justify-between gap-2">
             <Button
               variant="contained"
+              color="green"
               type="submit"
             >
               add
             </Button>
             <Button
               variant="contained"
+              color="red"
               onClick={handleCloseAddCardMenu}
             >
               close

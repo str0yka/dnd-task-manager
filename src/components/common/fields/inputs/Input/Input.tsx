@@ -10,13 +10,17 @@ interface InputProps extends React.ComponentProps<'input'> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ error, helperText, ...props }, ref) => (
-    <label className="flex flex-col gap-1">
+    <label
+      className={cn('block', {
+        'relative mb-4': !!helperText,
+      })}
+    >
       <input
         type="text"
         {...props}
         ref={ref}
         className={cn(
-          'w-full py-2 px-2 rounded font-medium text-sm outline-none border-2 border-gray-950/10',
+          'w-full py-1 px-2 rounded font-medium text-sm outline-none border-2 border-gray-950/10',
           {
             'border-red-400/50 bg-red-400/50 placeholder:text-black/50': error,
           },
@@ -25,7 +29,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       />
       {helperText && (
         <p
-          className={cn('pl-2 text-xs font-medium text-gray-500/75 truncate', {
+          className={cn('absolute inset-x-0 pl-2 text-xs font-medium text-gray-500/75 truncate', {
             'text-red-400': error,
           })}
         >
